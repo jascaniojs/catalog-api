@@ -9,7 +9,7 @@ export class CatalogApiStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    // DynamoDB Table
+    // Catalog DynamoDB Table
     const catalogTable = new dynamodb.Table(this, 'CatalogTable', {
       tableName: 'catalog-items',
       partitionKey: { name: 'PK', type: dynamodb.AttributeType.STRING },
@@ -26,6 +26,23 @@ export class CatalogApiStack extends cdk.Stack {
       projectionType: dynamodb.ProjectionType.ALL,
     });
 
+    // Users DynamoDB Table
+    const usersTable = new dynamodb.Table(this, 'UsersTable', {
+      tableName: 'catalog-users',
+      partitionKey: { name: 'PK', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'SK', type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      removalPolicy: cdk.RemovalPolicy.DESTROY, // For development
+    });
+
+    // Global Secondary Index for role queries
+    usersTable.addGlobalSecondaryIndex({
+      indexName: 'RoleIndex',
+      partitionKey: { name: 'GSI1PK', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'GSI1SK', type: dynamodb.AttributeType.STRING },
+      projectionType: dynamodb.ProjectionType.ALL,
+    });
+
     // Lambda Function (requires pre-built dist folder from webpack)
     const catalogFunction = new lambda.Function(this, 'CatalogFunction', {
       runtime: lambda.Runtime.NODEJS_18_X,
@@ -36,13 +53,17 @@ export class CatalogApiStack extends cdk.Stack {
       environment: {
         NODE_ENV: 'production',
         DYNAMODB_TABLE_NAME: catalogTable.tableName,
+        USERS_TABLE_NAME: usersTable.tableName,
         BEDROCK_REGION: this.region,
         BEDROCK_MODEL_ID: 'anthropic.claude-3-haiku-20240307-v1:0',
+        JWT_SECRET: process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production-min-32-characters-long',
+        JWT_EXPIRES_IN: '365d',
       },
     });
 
     // Grant DynamoDB permissions to Lambda
     catalogTable.grantReadWriteData(catalogFunction);
+    usersTable.grantReadWriteData(catalogFunction);
 
     // Grant Bedrock permissions to Lambda
     catalogFunction.addToRolePolicy(
@@ -103,9 +124,14 @@ export class CatalogApiStack extends cdk.Stack {
       description: 'Lambda Function Name',
     });
 
-    new cdk.CfnOutput(this, 'DynamoDbTableName', {
+    new cdk.CfnOutput(this, 'CatalogTableName', {
       value: catalogTable.tableName,
-      description: 'DynamoDB Table Name',
+      description: 'Catalog DynamoDB Table Name',
+    });
+
+    new cdk.CfnOutput(this, 'UsersTableName', {
+      value: usersTable.tableName,
+      description: 'Users DynamoDB Table Name',
     });
   }
 }
