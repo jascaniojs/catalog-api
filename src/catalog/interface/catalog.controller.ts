@@ -94,14 +94,14 @@ export class CatalogController {
   async approve(
     @Param('id') id: string,
     @Res() response: Response,
-  ): Promise<CatalogItemResponseDto | Response>   {
+  ): Promise<Response> {
     const item = await this.catalogService.approveItem(id);
     if (item.status === CatalogItemStatus.APPROVED) {
-      return CatalogItemResponseDto.fromEntity(item);
+      return response.json(CatalogItemResponseDto.fromEntity(item));
     }
     return response
-      .status(HttpStatus.NOT_MODIFIED)
-      .send({ message: 'Item cannot be approved due to low quality score.' });
+      .status(HttpStatus.BAD_REQUEST)
+      .json({ message: 'Item cannot be approved due to low quality score.' });
   }
 
   @Post(':id/reject')
