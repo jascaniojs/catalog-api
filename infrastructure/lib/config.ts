@@ -11,6 +11,8 @@ export type ConfigProps = {
     JWT_EXPIRES_IN: string;
     OPENAI_API_KEY: string;
     OPENAI_MODEL: string;
+    GEMINI_API_KEY: string;
+    GEMINI_MODEL: string;
 };
 
 export const getConfig = (): ConfigProps => ({
@@ -21,4 +23,6 @@ export const getConfig = (): ConfigProps => ({
     JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || "30d",
     OPENAI_API_KEY: process.env.OPENAI_API_KEY || "",
     OPENAI_MODEL: process.env.OPENAI_MODEL || "gpt-4o-mini",
+    GEMINI_API_KEY: process.env.GEMINI_API_KEY || "",
+    GEMINI_MODEL: process.env.GEMINI_MODEL || "gemini-2.0-flash-exp",
 });

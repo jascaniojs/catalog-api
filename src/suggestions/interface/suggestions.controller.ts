@@ -3,8 +3,6 @@ import {
   Post,
   Body,
   Param,
-  HttpCode,
-  HttpStatus,
   UseGuards,
 } from '@nestjs/common';
 import { SuggestionsService } from '../domain/suggestions.service';

@@ -1,12 +1,12 @@
 import { Module, Global } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { appConfig } from './config/app.config';
+import { appConfigAsync } from './config/app.config';
 
 @Global()
 @Module({
   imports: [
     ConfigModule.forRoot({
-      load: [appConfig],
+      load: [appConfigAsync],
       isGlobal: true,
       envFilePath: ['.env.local', '.env'],
     }),

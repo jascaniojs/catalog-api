@@ -25,3 +25,5 @@ env.json
 
 # User credentials with JWT tokens
 users.json
+
+/coverage

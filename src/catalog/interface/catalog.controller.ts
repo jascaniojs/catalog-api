@@ -94,7 +94,7 @@ export class CatalogController {
   async approve(
     @Param('id') id: string,
     @Res() response: Response,
-  ): Promise<any> {
+  ): Promise<CatalogItemResponseDto | Response>   {
     const item = await this.catalogService.approveItem(id);
     if (item.status === CatalogItemStatus.APPROVED) {
       return CatalogItemResponseDto.fromEntity(item);
