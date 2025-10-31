@@ -25,12 +25,15 @@ export class SecretsLoader {
   static async loadSecrets(): Promise<LoadedSecrets> {
     const secrets: LoadedSecrets = {};
 
-    // Only load from Secrets Manager if ARNs are provided (AWS deployment)
-    const hasSecretsManager = !!process.env.JWT_SECRET_ARN;
+    // Skip Secrets Manager in local/test environments
+    const isLocal =
+      process.env.NODE_ENV === 'development' ||
+      process.env.NODE_ENV === 'test' ||
+      !process.env.JWT_SECRET_ARN;
 
-    if (!hasSecretsManager) {
+    if (isLocal) {
       console.log(
-        '[Config] Running in local mode - using environment variables'
+        '[Config] Running in local/test mode - using environment variables only'
       );
       return secrets;
     }
