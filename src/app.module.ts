@@ -3,6 +3,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { SharedInfrastructureModule } from './shared/infrastructure/shared-infrastructure.module';
 import { AuthModule } from './auth/auth.module';
 import { CatalogModule } from './catalog/catalog.module';
+import { SuggestionsModule } from './suggestions/suggestions.module';
 import { JwtAuthGuard } from './auth/interface/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/interface/guards/roles.guard';
 
@@ -11,6 +12,7 @@ import { RolesGuard } from './auth/interface/guards/roles.guard';
     SharedInfrastructureModule,
     AuthModule,
     CatalogModule,
+    SuggestionsModule,
   ],
   controllers: [],
   providers: [
