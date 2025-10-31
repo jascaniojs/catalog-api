@@ -5,7 +5,7 @@ const {
   ListTablesCommand,
 } = require('@aws-sdk/client-dynamodb');
 
-require('dotenv').config({ path: '.env.local' });
+require('dotenv').config({ path: '.env' });
 
 // Configuration
 const isLocal = process.env.NODE_ENV === 'development' || process.env.DYNAMODB_ENDPOINT;

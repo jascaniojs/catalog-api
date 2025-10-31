@@ -2,8 +2,10 @@ const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const { DynamoDBDocumentClient, PutCommand } = require('@aws-sdk/lib-dynamodb');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
+const fs = require('fs');
+const path = require('path');
 
-require('dotenv').config({ path: '.env.local' });
+require('dotenv').config({ path: '.env' });
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production-min-32-characters-long';
 const JWT_EXPIRES_IN = '365d'; // Long-lived for testing
@@ -40,6 +42,7 @@ async function seedUsers() {
   console.log('🌱 Seeding users with pre-generated tokens...\n');
 
   const tokens = {};
+  const usersData = [];
 
   for (const user of users) {
     const userId = uuidv4();
@@ -73,9 +76,22 @@ async function seedUsers() {
     }));
 
     tokens[user.role] = token;
+    usersData.push({
+      userId,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      token,
+    });
+
     console.log(`✅ Created ${user.role} user: ${user.email}`);
     console.log(`   User ID: ${userId}`);
   }
+
+  // Save users with tokens to users.json
+  const usersJsonPath = path.join(__dirname, '..', 'users.json');
+  fs.writeFileSync(usersJsonPath, JSON.stringify(usersData, null, 2), 'utf8');
+  console.log(`\n💾 Saved user credentials to: ${usersJsonPath}`);
 
   console.log('\n' + '='.repeat(80));
   console.log('🔑 TEST TOKENS - Copy these to use in your requests:\n');
