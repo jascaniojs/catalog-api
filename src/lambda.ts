@@ -1,38 +1,31 @@
+
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
-import { ExpressAdapter } from '@nestjs/platform-express';
-import { Context, Handler } from 'aws-lambda';
 import serverlessExpress from '@codegenie/serverless-express';
+import { Callback, Context, Handler } from 'aws-lambda';
 import { AppModule } from './app.module';
-import express from 'express';
+import {ValidationPipe} from "@nestjs/common";
 
-let cachedServer: Handler;
+let server: Handler;
 
-async function bootstrap() {
-  if (!cachedServer) {
-    const expressApp = express();
-    const nestApp = await NestFactory.create(AppModule, new ExpressAdapter(expressApp));
-
-    nestApp.useGlobalPipes(new ValidationPipe({
-      transform: true,
-      whitelist: true,
-      forbidNonWhitelisted: true,
-    }));
-
-    nestApp.enableCors();
-    nestApp.setGlobalPrefix('api');
-
-    await nestApp.init();
-
-    cachedServer = serverlessExpress({ app: expressApp });
-  }
-
-  return cachedServer;
+async function bootstrap(): Promise<Handler> {
+    const app = await NestFactory.create(AppModule);
+    app.useGlobalPipes(new ValidationPipe({
+        transform: true,
+        whitelist: true,
+        forbidNonWhitelisted: true,
+    }))
+    app.setGlobalPrefix('api');
+    app.enableCors();
+    await app.init();
+    const expressApp = app.getHttpAdapter().getInstance();
+    return serverlessExpress({ app: expressApp });
 }
 
-const handler = async (event: any, context: Context, callback: any) => {
-  const server = await bootstrap();
-  return server(event, context, callback);
+export const handler: Handler = async (
+    event: any,
+    context: Context,
+    callback: Callback,
+) => {
+    server = server ?? (await bootstrap());
+    return server(event, context, callback);
 };
-
-module.exports.handler = handler;
