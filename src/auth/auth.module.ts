@@ -3,8 +3,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './interface/strategies/jwt.strategy';
-import { UserRepository } from './infrastructure/user.repository';
-import { UsersDbService } from './infrastructure/users-db.service';
+import { UserRepository, USERS_DB_SERVICE } from './infrastructure/user.repository';
+import { DynamoDbService } from '../shared/infrastructure/database/dynamodb.service';
 import { AppConfig } from '../shared/infrastructure/config/app.config';
 
 @Module({
@@ -21,7 +21,20 @@ import { AppConfig } from '../shared/infrastructure/config/app.config';
       }),
     }),
   ],
-  providers: [JwtStrategy, UserRepository, UsersDbService],
+  providers: [
+    JwtStrategy,
+    UserRepository,
+    {
+      provide: USERS_DB_SERVICE,
+      useFactory: (configService: ConfigService<AppConfig>) => {
+        const usersTableName = configService.get('aws.dynamodb.usersTableName', {
+          infer: true,
+        });
+        return new DynamoDbService(configService, usersTableName);
+      },
+      inject: [ConfigService],
+    },
+  ],
   exports: [UserRepository],
 })
 export class AuthModule {}

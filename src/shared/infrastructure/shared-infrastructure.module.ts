@@ -1,7 +1,6 @@
 import { Module, Global } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { appConfig } from './config/app.config';
-import { DynamoDbService } from './database/dynamodb.service';
 
 @Global()
 @Module({
@@ -12,7 +11,7 @@ import { DynamoDbService } from './database/dynamodb.service';
       envFilePath: ['.env.local', '.env'],
     }),
   ],
-  providers: [DynamoDbService],
-  exports: [ConfigModule, DynamoDbService],
+  providers: [],
+  exports: [ConfigModule],
 })
 export class SharedInfrastructureModule {}

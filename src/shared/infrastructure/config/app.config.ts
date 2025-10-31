@@ -24,7 +24,7 @@ export interface AppConfig {
 }
 
 export const appConfig = (): AppConfig => ({
-    nodeEnv: process.env.NODE_ENV || 'development',
+  nodeEnv: process.env.NODE_ENV || 'development',
   port: parseInt(process.env.PORT, 10) || 3000,
   aws: {
     region: process.env.AWS_REGION || 'us-east-1',

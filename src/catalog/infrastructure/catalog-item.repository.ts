@@ -1,6 +1,6 @@
-import {Injectable} from '@nestjs/common';
-import {DynamoDbService} from '@/shared/infrastructure/database/dynamodb.service';
-import {CatalogItem, CatalogItemStatus} from '../domain/catalog-item.entity';
+import { Injectable } from '@nestjs/common';
+import { DynamoDbService } from '@/shared/infrastructure/database/dynamodb.service';
+import { CatalogItem, CatalogItemStatus } from '../domain/catalog-item.entity';
 
 interface CatalogItemDynamoRecord {
   PK: string;

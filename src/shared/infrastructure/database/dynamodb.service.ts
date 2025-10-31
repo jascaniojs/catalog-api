@@ -18,13 +18,15 @@ export class DynamoDbService {
   private readonly client: DynamoDBDocumentClient;
   private readonly tableName: string;
 
-  constructor(private readonly configService: ConfigService<AppConfig>) {
+  constructor(
+    private readonly configService: ConfigService<AppConfig>,
+    tableName?: string,
+  ) {
     const config = this.configService.get('aws.dynamodb', { infer: true });
 
-    const clientConfig: any = {
+    const clientConfig: { region: string; endpoint?: string; credentials?: any } = {
       region: this.configService.get('aws.region', { infer: true }),
     };
-
 
     if (config.endpoint) {
       clientConfig.endpoint = config.endpoint;
@@ -36,7 +38,8 @@ export class DynamoDbService {
 
     const dynamoClient = new DynamoDBClient(clientConfig);
     this.client = DynamoDBDocumentClient.from(dynamoClient);
-    this.tableName = config.tableName;
+    // Use provided table name or default to catalog items table
+    this.tableName = tableName || config.tableName;
   }
 
   async get<T = any>(key: Record<string, any>): Promise<T | null> {

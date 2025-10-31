@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { UsersDbService } from './users-db.service';
+import { Injectable, Inject } from '@nestjs/common';
+import { DynamoDbService } from '@/shared/infrastructure/database/dynamodb.service';
 import { User } from '../domain/user.entity';
 import { UserRole } from '../domain/user-role.enum';
 
@@ -17,9 +17,14 @@ interface UserDynamoRecord {
   createdAt: string;
 }
 
+export const USERS_DB_SERVICE = 'USERS_DB_SERVICE';
+
 @Injectable()
 export class UserRepository {
-  constructor(private readonly usersDb: UsersDbService) {}
+  constructor(
+    @Inject(USERS_DB_SERVICE)
+    private readonly usersDb: DynamoDbService,
+  ) {}
 
   async findById(userId: string): Promise<User | null> {
     const record = await this.usersDb.get<UserDynamoRecord>({
