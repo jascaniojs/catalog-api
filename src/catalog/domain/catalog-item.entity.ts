@@ -42,17 +42,17 @@ export class CatalogItem {
     this.updatedAt = data.updatedAt || new Date();
   }
 
-  updateContent(title: string, description: string, category: string, tags: string[]): void {
+  updateContent(
+    title: string,
+    description: string,
+    category: string,
+    tags: string[],
+  ): void {
     this.title = title;
     this.description = description;
     this.category = category;
     this.tags = tags;
     this.updatedAt = new Date();
-
-    // Reset status if item was approved
-    if (this.status === CatalogItemStatus.APPROVED) {
-      this.status = CatalogItemStatus.DRAFT;
-    }
   }
 
   setQualityScore(score: QualityScore): void {
@@ -70,9 +70,6 @@ export class CatalogItem {
   }
 
   markAsApproved(): void {
-    if (!this.canBeApproved()) {
-      throw new Error('Item cannot be approved: quality score must be 70 or higher');
-    }
     this.status = CatalogItemStatus.APPROVED;
     this.updatedAt = new Date();
   }

@@ -37,7 +37,7 @@ export class UserRepository {
   async findByEmail(email: string): Promise<User | null> {
     const records = await this.usersDb.scan<UserDynamoRecord>(
       'email = :email',
-      { ':email': email }
+      { ':email': email },
     );
 
     if (records.length === 0) {

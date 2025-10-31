@@ -1,6 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { DynamoDbService } from '../../shared/infrastructure/database/dynamodb.service';
-import { CatalogItem, CatalogItemStatus } from '../domain/catalog-item.entity';
+import {Injectable} from '@nestjs/common';
+import {DynamoDbService} from '@/shared/infrastructure/database/dynamodb.service';
+import {CatalogItem, CatalogItemStatus} from '../domain/catalog-item.entity';
 
 interface CatalogItemDynamoRecord {
   PK: string;
@@ -46,10 +46,10 @@ export class CatalogItemRepository {
     const records = await this.dynamoDb.scan<CatalogItemDynamoRecord>(
       '#entityType = :entityType',
       { ':entityType': 'CatalogItem' },
-      { '#entityType': 'EntityType' }
+      { '#entityType': 'EntityType' },
     );
 
-    return records.map(record => this.fromDynamoRecord(record));
+    return records.map((record) => this.fromDynamoRecord(record));
   }
 
   async findByStatus(status: CatalogItemStatus): Promise<CatalogItem[]> {
@@ -57,20 +57,20 @@ export class CatalogItemRepository {
       'GSI1PK = :status',
       { ':status': `STATUS#${status}` },
       undefined,
-      'StatusIndex'
+      'StatusIndex',
     );
 
-    return records.map(record => this.fromDynamoRecord(record));
+    return records.map((record) => this.fromDynamoRecord(record));
   }
 
   async existsByTitle(title: string, excludeId?: string): Promise<boolean> {
     const records = await this.dynamoDb.scan<CatalogItemDynamoRecord>(
       'title = :title',
-      { ':title': title }
+      { ':title': title },
     );
 
     if (excludeId) {
-      return records.some(record => record.id !== excludeId);
+      return records.some((record) => record.id !== excludeId);
     }
 
     return records.length > 0;

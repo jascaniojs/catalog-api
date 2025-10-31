@@ -2,13 +2,19 @@ import * as cdk from 'aws-cdk-lib';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
-import * as iam from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
+import {ConfigProps} from "../lib/config";
+import {StackProps} from "aws-cdk-lib";
+
+type AwsEnvStackProps = StackProps & {
+    config: Readonly<ConfigProps>;
+};
+
 
 export class CatalogApiStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props: AwsEnvStackProps) {
     super(scope, id, props);
-
+    const { config } = props;
     // Catalog DynamoDB Table
     const catalogTable = new dynamodb.Table(this, 'CatalogTable', {
       tableName: 'catalog-items',
@@ -44,40 +50,31 @@ export class CatalogApiStack extends cdk.Stack {
     });
 
     // Lambda Function (requires pre-built dist folder from webpack)
+
+      const LambdaEnv = {
+          NODE_ENV: config.NODE_ENV || 'production',
+          DYNAMODB_TABLE_NAME: catalogTable.tableName,
+          DYNAMODB_ENDPOINT: process.env.DYNAMODB_ENDPOINT,
+          USERS_TABLE_NAME: usersTable.tableName,
+          JWT_SECRET: config.JWT_SECRET ,
+          JWT_EXPIRES_IN: '30d',
+      };
+      if(config.NODE_ENV === 'development' && config.DYNAMODB_ENDPOINT){
+          LambdaEnv.DYNAMODB_ENDPOINT = config.DYNAMODB_ENDPOINT;
+      }
     const catalogFunction = new lambda.Function(this, 'CatalogFunction', {
       runtime: lambda.Runtime.NODEJS_18_X,
       handler: 'main.handler',
       code: lambda.Code.fromAsset('dist'),
       timeout: cdk.Duration.seconds(30),
       memorySize: 512,
-      environment: {
-        NODE_ENV: 'production',
-        DYNAMODB_TABLE_NAME: catalogTable.tableName,
-        USERS_TABLE_NAME: usersTable.tableName,
-        BEDROCK_REGION: this.region,
-        BEDROCK_MODEL_ID: 'anthropic.claude-3-haiku-20240307-v1:0',
-        JWT_SECRET: process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production-min-32-characters-long',
-        JWT_EXPIRES_IN: '365d',
-      },
+      environment: LambdaEnv,
     });
 
     // Grant DynamoDB permissions to Lambda
     catalogTable.grantReadWriteData(catalogFunction);
     usersTable.grantReadWriteData(catalogFunction);
 
-    // Grant Bedrock permissions to Lambda
-    catalogFunction.addToRolePolicy(
-      new iam.PolicyStatement({
-        effect: iam.Effect.ALLOW,
-        actions: [
-          'bedrock:InvokeModel',
-          'bedrock:InvokeModelWithResponseStream',
-        ],
-        resources: [
-          `arn:aws:bedrock:${this.region}::foundation-model/anthropic.claude-3-haiku-20240307-v1:0`,
-        ],
-      })
-    );
 
     // API Gateway
     const api = new apigateway.RestApi(this, 'CatalogApi', {
@@ -96,21 +93,13 @@ export class CatalogApiStack extends cdk.Stack {
       },
     });
 
-    // Lambda integration
+    // Lambda integration with proxy mode (passes all headers, body, etc.)
     const lambdaIntegration = new apigateway.LambdaIntegration(catalogFunction, {
-      requestTemplates: { 'application/json': '{ "statusCode": "200" }' },
+      proxy: true,
     });
-
-    // API Gateway routes
-    const apiResource = api.root.addResource('api');
-    const catalogResource = apiResource.addResource('catalog');
-
-    // Add all HTTP methods to the catalog resource
-    catalogResource.addMethod('GET', lambdaIntegration);
-    catalogResource.addMethod('POST', lambdaIntegration);
-
-    // Add proxy resource for sub-paths like /catalog/{id}
-    const proxyResource = catalogResource.addResource('{proxy+}');
+    // API Gateway routes - Use catch-all proxy for all paths
+    // This allows NestJS to handle all routing internally
+    const proxyResource = api.root.addResource('{proxy+}');
     proxyResource.addMethod('ANY', lambdaIntegration);
 
     // Outputs

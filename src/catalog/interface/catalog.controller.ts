@@ -10,7 +10,9 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
+  Res,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { CatalogService } from '../domain/catalog.service';
 import { CreateCatalogItemDto } from './dtos/create-catalog-item.dto';
 import { UpdateCatalogItemDto } from './dtos/update-catalog-item.dto';
@@ -30,7 +32,9 @@ export class CatalogController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @Roles(UserRole.REGULAR, UserRole.ADMIN)
-  async create(@Body() createDto: CreateCatalogItemDto): Promise<CatalogItemResponseDto> {
+  async create(
+    @Body() createDto: CreateCatalogItemDto,
+  ): Promise<CatalogItemResponseDto> {
     const item = await this.catalogService.createItem({
       title: createDto.title,
       description: createDto.description,
@@ -42,12 +46,14 @@ export class CatalogController {
 
   @Get()
   @Public()
-  async findAll(@Query('status') status?: CatalogItemStatus): Promise<CatalogItemResponseDto[]> {
+  async findAll(
+    @Query('status') status?: CatalogItemStatus,
+  ): Promise<CatalogItemResponseDto[]> {
     const items = status
       ? await this.catalogService.getItemsByStatus(status)
       : await this.catalogService.getAllItems();
 
-    return items.map(item => CatalogItemResponseDto.fromEntity(item));
+    return items.map((item) => CatalogItemResponseDto.fromEntity(item));
   }
 
   @Get(':id')
@@ -85,9 +91,17 @@ export class CatalogController {
   @Post(':id/approve')
   @HttpCode(HttpStatus.OK)
   @Roles(UserRole.ADMIN)
-  async approve(@Param('id') id: string): Promise<CatalogItemResponseDto> {
+  async approve(
+    @Param('id') id: string,
+    @Res() response: Response,
+  ): Promise<any> {
     const item = await this.catalogService.approveItem(id);
-    return CatalogItemResponseDto.fromEntity(item);
+    if (item.status === CatalogItemStatus.APPROVED) {
+      return CatalogItemResponseDto.fromEntity(item);
+    }
+    return response
+      .status(HttpStatus.NOT_MODIFIED)
+      .send({ message: 'Item cannot be approved due to low quality score.' });
   }
 
   @Post(':id/reject')
@@ -97,5 +111,4 @@ export class CatalogController {
     const item = await this.catalogService.rejectItem(id);
     return CatalogItemResponseDto.fromEntity(item);
   }
-
 }

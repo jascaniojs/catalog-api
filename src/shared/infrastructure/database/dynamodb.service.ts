@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import {
@@ -14,6 +14,7 @@ import { AppConfig } from '../config/app.config';
 
 @Injectable()
 export class DynamoDbService {
+  private readonly logger = new Logger(DynamoDbService.name);
   private readonly client: DynamoDBDocumentClient;
   private readonly tableName: string;
 
@@ -24,7 +25,7 @@ export class DynamoDbService {
       region: this.configService.get('aws.region', { infer: true }),
     };
 
-    // For local development with DynamoDB Local, provide dummy credentials
+
     if (config.endpoint) {
       clientConfig.endpoint = config.endpoint;
       clientConfig.credentials = {
@@ -39,19 +40,23 @@ export class DynamoDbService {
   }
 
   async get<T = any>(key: Record<string, any>): Promise<T | null> {
-    const result = await this.client.send(new GetCommand({
-      TableName: this.tableName,
-      Key: key,
-    }));
+    const result = await this.client.send(
+      new GetCommand({
+        TableName: this.tableName,
+        Key: key,
+      }),
+    );
 
-    return result.Item as T || null;
+    return (result.Item as T) || null;
   }
 
   async put<T = any>(item: T): Promise<void> {
-    await this.client.send(new PutCommand({
-      TableName: this.tableName,
-      Item: item,
-    }));
+    await this.client.send(
+      new PutCommand({
+        TableName: this.tableName,
+        Item: item,
+      }),
+    );
   }
 
   async update(
@@ -60,23 +65,27 @@ export class DynamoDbService {
     expressionAttributeValues?: Record<string, any>,
     expressionAttributeNames?: Record<string, string>,
   ): Promise<any> {
-    const result = await this.client.send(new UpdateCommand({
-      TableName: this.tableName,
-      Key: key,
-      UpdateExpression: updateExpression,
-      ExpressionAttributeValues: expressionAttributeValues,
-      ExpressionAttributeNames: expressionAttributeNames,
-      ReturnValues: 'ALL_NEW',
-    }));
+    const result = await this.client.send(
+      new UpdateCommand({
+        TableName: this.tableName,
+        Key: key,
+        UpdateExpression: updateExpression,
+        ExpressionAttributeValues: expressionAttributeValues,
+        ExpressionAttributeNames: expressionAttributeNames,
+        ReturnValues: 'ALL_NEW',
+      }),
+    );
 
     return result.Attributes;
   }
 
   async delete(key: Record<string, any>): Promise<void> {
-    await this.client.send(new DeleteCommand({
-      TableName: this.tableName,
-      Key: key,
-    }));
+    await this.client.send(
+      new DeleteCommand({
+        TableName: this.tableName,
+        Key: key,
+      }),
+    );
   }
 
   async query<T = any>(
@@ -85,15 +94,17 @@ export class DynamoDbService {
     expressionAttributeNames?: Record<string, string>,
     indexName?: string,
   ): Promise<T[]> {
-    const result = await this.client.send(new QueryCommand({
-      TableName: this.tableName,
-      KeyConditionExpression: keyConditionExpression,
-      ExpressionAttributeValues: expressionAttributeValues,
-      ExpressionAttributeNames: expressionAttributeNames,
-      ...(indexName && { IndexName: indexName }),
-    }));
+    const result = await this.client.send(
+      new QueryCommand({
+        TableName: this.tableName,
+        KeyConditionExpression: keyConditionExpression,
+        ExpressionAttributeValues: expressionAttributeValues,
+        ExpressionAttributeNames: expressionAttributeNames,
+        ...(indexName && { IndexName: indexName }),
+      }),
+    );
 
-    return result.Items as T[] || [];
+    return (result.Items as T[]) || [];
   }
 
   async scan<T = any>(
@@ -101,14 +112,20 @@ export class DynamoDbService {
     expressionAttributeValues?: Record<string, any>,
     expressionAttributeNames?: Record<string, string>,
   ): Promise<T[]> {
-    const result = await this.client.send(new ScanCommand({
-      TableName: this.tableName,
-      ...(filterExpression && { FilterExpression: filterExpression }),
-      ...(expressionAttributeValues && { ExpressionAttributeValues: expressionAttributeValues }),
-      ...(expressionAttributeNames && { ExpressionAttributeNames: expressionAttributeNames }),
-    }));
+    const result = await this.client.send(
+      new ScanCommand({
+        TableName: this.tableName,
+        ...(filterExpression && { FilterExpression: filterExpression }),
+        ...(expressionAttributeValues && {
+          ExpressionAttributeValues: expressionAttributeValues,
+        }),
+        ...(expressionAttributeNames && {
+          ExpressionAttributeNames: expressionAttributeNames,
+        }),
+      }),
+    );
 
-    return result.Items as T[] || [];
+    return (result.Items as T[]) || [];
   }
 
   getTableName(): string {

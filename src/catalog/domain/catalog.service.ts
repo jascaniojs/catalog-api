@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CatalogItem, CatalogItemStatus } from './catalog-item.entity';
 import { QualityScoreService } from './quality-score.service';
 import { CatalogItemRepository } from '../infrastructure/catalog-item.repository';
@@ -52,12 +52,15 @@ export class CatalogService {
     return await this.repository.findByStatus(status);
   }
 
-  async updateItem(id: string, data: {
-    title: string;
-    description: string;
-    category: string;
-    tags: string[];
-  }): Promise<CatalogItem> {
+  async updateItem(
+    id: string,
+    data: {
+      title: string;
+      description: string;
+      category: string;
+      tags: string[];
+    },
+  ): Promise<CatalogItem> {
     const item = await this.getItemById(id);
 
     // Check for duplicate title (excluding current item)
@@ -87,8 +90,11 @@ export class CatalogService {
 
   async approveItem(id: string): Promise<CatalogItem> {
     const item = await this.getItemById(id);
-    item.markAsApproved();
-    return await this.repository.update(item);
+    if (item.canBeApproved()) {
+      item.markAsApproved();
+      return await this.repository.update(item);
+    }
+    return item;
   }
 
   async rejectItem(id: string): Promise<CatalogItem> {

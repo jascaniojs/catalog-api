@@ -1,4 +1,8 @@
-import { CatalogItem, CatalogItemStatus, QualityScore } from '../../domain/catalog-item.entity';
+import {
+  CatalogItem,
+  CatalogItemStatus,
+  QualityScore,
+} from '../../domain/catalog-item.entity';
 
 export class CatalogItemResponseDto {
   id: string;

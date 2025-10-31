@@ -1,4 +1,10 @@
-import { IsString, IsArray, IsOptional, MinLength, MaxLength } from 'class-validator';
+import {
+  IsString,
+  IsArray,
+  IsOptional,
+  MinLength,
+  MaxLength,
+} from 'class-validator';
 
 export class CreateCatalogItemDto {
   @IsString()

@@ -36,19 +36,23 @@ export class UsersDbService {
   }
 
   async get<T = any>(key: Record<string, any>): Promise<T | null> {
-    const result = await this.client.send(new GetCommand({
-      TableName: this.tableName,
-      Key: key,
-    }));
+    const result = await this.client.send(
+      new GetCommand({
+        TableName: this.tableName,
+        Key: key,
+      }),
+    );
 
-    return result.Item as T || null;
+    return (result.Item as T) || null;
   }
 
   async put<T = any>(item: T): Promise<void> {
-    await this.client.send(new PutCommand({
-      TableName: this.tableName,
-      Item: item,
-    }));
+    await this.client.send(
+      new PutCommand({
+        TableName: this.tableName,
+        Item: item,
+      }),
+    );
   }
 
   async scan<T = any>(
@@ -56,14 +60,20 @@ export class UsersDbService {
     expressionAttributeValues?: Record<string, any>,
     expressionAttributeNames?: Record<string, string>,
   ): Promise<T[]> {
-    const result = await this.client.send(new ScanCommand({
-      TableName: this.tableName,
-      ...(filterExpression && { FilterExpression: filterExpression }),
-      ...(expressionAttributeValues && { ExpressionAttributeValues: expressionAttributeValues }),
-      ...(expressionAttributeNames && { ExpressionAttributeNames: expressionAttributeNames }),
-    }));
+    const result = await this.client.send(
+      new ScanCommand({
+        TableName: this.tableName,
+        ...(filterExpression && { FilterExpression: filterExpression }),
+        ...(expressionAttributeValues && {
+          ExpressionAttributeValues: expressionAttributeValues,
+        }),
+        ...(expressionAttributeNames && {
+          ExpressionAttributeNames: expressionAttributeNames,
+        }),
+      }),
+    );
 
-    return result.Items as T[] || [];
+    return (result.Items as T[]) || [];
   }
 
   getTableName(): string {

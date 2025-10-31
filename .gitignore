@@ -16,3 +16,12 @@ yarn-error.log*
 /.aws-sam
 /cdk.out
 .DS_Store
+
+# Environment files
+.env
+.env
+.env.*.local
+env.json
+
+# User credentials with JWT tokens
+users.json

@@ -1,0 +1,36 @@
+# Dependencies
+node_modules
+
+# Build outputs
+dist
+build
+.webpack
+
+# CDK outputs
+cdk.out
+*.js.map
+
+# Test coverage
+coverage
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode
+.idea
+
+# Logs
+*.log
+npm-debug.log*
+
+# Configuration files
+*.config.js
+webpack.config.js
+jest.config.js
+.eslintrc.js
+
+# Scripts
+scripts/*.js

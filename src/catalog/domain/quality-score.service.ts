@@ -19,7 +19,10 @@ export class QualityScoreService {
       uniqueTitle: isUniqueTitle ? 5 : 0,
     };
 
-    const total = Object.values(breakdown).reduce((sum, score) => sum + score, 0);
+    const total = Object.values(breakdown).reduce(
+      (sum, score) => sum + score,
+      0,
+    );
 
     return {
       total,
@@ -29,7 +32,7 @@ export class QualityScoreService {
 
   private scoreTitleLength(title: string): number {
     const length = title.length;
-    return (length >= 12 && length <= 50) ? 20 : 0;
+    return length >= 12 && length <= 50 ? 20 : 0;
   }
 
   private scoreDescriptionLength(description: string): number {
