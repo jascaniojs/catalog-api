@@ -11,7 +11,7 @@ import {
  */
 export function createTestDynamoDBClient(): DynamoDBDocumentClient {
   const endpoint = process.env.DYNAMODB_ENDPOINT || 'http://localhost:8000';
-  const region = process.env.AWS_REGION || 'us-east-1';
+  const region = process.env.AWS_REGION || 'eu-central-1';
 
   const client = new DynamoDBClient({
     region,

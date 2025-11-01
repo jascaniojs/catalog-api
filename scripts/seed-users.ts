@@ -9,7 +9,7 @@ import * as dotenv from 'dotenv';
 dotenv.config({ path: '.env' });
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production-min-32-characters-long';
-const JWT_EXPIRES_IN = '365d'; // Long-lived for testing
+const JWT_EXPIRES_IN = '10d'; // Long-lived for testing
 
 interface ClientConfig {
   region: string;
@@ -21,7 +21,7 @@ interface ClientConfig {
 }
 
 const clientConfig: ClientConfig = {
-  region: process.env.AWS_REGION || 'us-east-1',
+  region: process.env.AWS_REGION || 'eu-central-1',
 };
 
 if (process.env.DYNAMODB_ENDPOINT) {

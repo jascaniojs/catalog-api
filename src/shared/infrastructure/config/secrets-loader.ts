@@ -16,7 +16,7 @@ export class SecretsLoader {
 
   private static getClient(): SecretsManagerClient {
     if (!this.client) {
-      const region = process.env.AWS_REGION || 'us-east-1';
+      const region = process.env.AWS_REGION || 'eu-central-1';
       this.client = new SecretsManagerClient({ region });
     }
     return this.client;

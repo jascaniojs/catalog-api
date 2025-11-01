@@ -12,7 +12,7 @@ dotenv.config({ path: '.env' });
 // Configuration
 const isLocal = process.env.NODE_ENV === 'development' || !!process.env.DYNAMODB_ENDPOINT;
 const endpoint = process.env.DYNAMODB_ENDPOINT || undefined;
-const region = process.env.AWS_REGION || 'us-east-1';
+const region = process.env.AWS_REGION || 'eu-central-1';
 const tableName = process.env.USERS_TABLE_NAME || 'catalog-users';
 
 interface ClientConfig {

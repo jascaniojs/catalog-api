@@ -16,7 +16,7 @@ export type ConfigProps = {
 };
 
 export const getConfig = (): ConfigProps => ({
-    AWS_REGION: process.env.AWS_REGION || "us-east-1",
+    AWS_REGION: process.env.AWS_REGION || "eu-central-1",
     NODE_ENV: process.env.NODE_ENV || "",
     DYNAMODB_ENDPOINT: process.env.DYNAMODB_ENDPOINT || "http://dynamodb-local:8080",
     JWT_SECRET: process.env.JWT_SECRET || "your-super-secret-jwt-key-change-in-production-min-32-characters-long",

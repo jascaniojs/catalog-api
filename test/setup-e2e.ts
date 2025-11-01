@@ -53,7 +53,7 @@ export default async function globalSetup() {
   try {
     // Verify tables exist
     const { stdout: tablesOutput } = await execAsync(
-      'aws dynamodb list-tables --endpoint-url http://localhost:8000 --region us-east-1 2>/dev/null'
+      'aws dynamodb list-tables --endpoint-url http://localhost:8000 --region eu-central-1 2>/dev/null'
     );
 
     const tables = JSON.parse(tablesOutput);
@@ -81,7 +81,7 @@ export default async function globalSetup() {
   try {
     // Check if users are seeded
     const { stdout: scanOutput } = await execAsync(
-      'aws dynamodb scan --table-name catalog-users --endpoint-url http://localhost:8000 --region us-east-1 --max-items 1 2>/dev/null'
+      'aws dynamodb scan --table-name catalog-users --endpoint-url http://localhost:8000 --region eu-central-1 --max-items 1 2>/dev/null'
     );
 
     const scanResult = JSON.parse(scanOutput);
