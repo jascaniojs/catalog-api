@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import {
@@ -14,7 +14,6 @@ import { AppConfig } from '../config/app.config';
 
 @Injectable()
 export class DynamoDbService {
-  private readonly logger = new Logger(DynamoDbService.name);
   private readonly client: DynamoDBDocumentClient;
   private readonly tableName: string;
 
@@ -62,12 +61,12 @@ export class DynamoDbService {
     );
   }
 
-  async update(
+  async update<T = any>(
     key: Record<string, any>,
     updateExpression: string,
     expressionAttributeValues?: Record<string, any>,
     expressionAttributeNames?: Record<string, string>,
-  ): Promise<any> {
+  ): Promise<Partial<T> & Record<string, any>> {
     const result = await this.client.send(
       new UpdateCommand({
         TableName: this.tableName,
@@ -79,7 +78,7 @@ export class DynamoDbService {
       }),
     );
 
-    return result.Attributes;
+    return result.Attributes as Partial<T> & Record<string, any>;
   }
 
   async delete(key: Record<string, any>): Promise<void> {
