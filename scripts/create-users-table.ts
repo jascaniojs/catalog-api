@@ -1,19 +1,30 @@
-const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
-const {
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import {
   CreateTableCommand,
   DescribeTableCommand,
   ListTablesCommand,
-} = require('@aws-sdk/client-dynamodb');
+  CreateTableCommandInput,
+} from '@aws-sdk/client-dynamodb';
+import * as dotenv from 'dotenv';
 
-require('dotenv').config({ path: '.env' });
+dotenv.config({ path: '.env' });
 
 // Configuration
-const isLocal = process.env.NODE_ENV === 'development' || process.env.DYNAMODB_ENDPOINT;
+const isLocal = process.env.NODE_ENV === 'development' || !!process.env.DYNAMODB_ENDPOINT;
 const endpoint = process.env.DYNAMODB_ENDPOINT || undefined;
 const region = process.env.AWS_REGION || 'us-east-1';
 const tableName = process.env.USERS_TABLE_NAME || 'catalog-users';
 
-const clientConfig = {
+interface ClientConfig {
+  region: string;
+  endpoint?: string;
+  credentials?: {
+    accessKeyId: string;
+    secretAccessKey: string;
+  };
+}
+
+const clientConfig: ClientConfig = {
   region,
 };
 
@@ -28,7 +39,7 @@ if (endpoint) {
 
 const client = new DynamoDBClient(clientConfig);
 
-const tableSchema = {
+const tableSchema: CreateTableCommandInput = {
   TableName: tableName,
   KeySchema: [
     { AttributeName: 'PK', KeyType: 'HASH' },
@@ -60,11 +71,11 @@ const tableSchema = {
   },
 };
 
-async function tableExists(tableName) {
+async function tableExists(tableName: string): Promise<boolean> {
   try {
     await client.send(new DescribeTableCommand({ TableName: tableName }));
     return true;
-  } catch (error) {
+  } catch (error: any) {
     if (error.name === 'ResourceNotFoundException') {
       return false;
     }
@@ -72,7 +83,7 @@ async function tableExists(tableName) {
   }
 }
 
-async function createTable() {
+async function createTable(): Promise<void> {
   try {
     console.log(`🔍 Checking DynamoDB connection (${isLocal ? 'LOCAL' : 'AWS'})...`);
     if (endpoint) {
@@ -101,7 +112,7 @@ async function createTable() {
     console.log('   - Use GSI1PK = "ROLE#ADMIN" to query by role');
     console.log('   - Use GSI1SK for sorting by user ID');
     console.log('\n🎯 Ready for users!');
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Error:', error.message);
 
     if (error.message.includes('ECONNREFUSED') || error.message.includes('Connection refused')) {

@@ -1,16 +1,26 @@
-const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
-const { DynamoDBDocumentClient, PutCommand } = require('@aws-sdk/lib-dynamodb');
-const jwt = require('jsonwebtoken');
-const { v4: uuidv4 } = require('uuid');
-const fs = require('fs');
-const path = require('path');
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb';
+import * as jwt from 'jsonwebtoken';
+import { v4 as uuidv4 } from 'uuid';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as dotenv from 'dotenv';
 
-require('dotenv').config({ path: '.env' });
+dotenv.config({ path: '.env' });
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production-min-32-characters-long';
 const JWT_EXPIRES_IN = '365d'; // Long-lived for testing
 
-const clientConfig = {
+interface ClientConfig {
+  region: string;
+  endpoint?: string;
+  credentials?: {
+    accessKeyId: string;
+    secretAccessKey: string;
+  };
+}
+
+const clientConfig: ClientConfig = {
   region: process.env.AWS_REGION || 'us-east-1',
 };
 
@@ -25,7 +35,35 @@ if (process.env.DYNAMODB_ENDPOINT) {
 const client = new DynamoDBClient(clientConfig);
 const docClient = DynamoDBDocumentClient.from(client);
 
-const users = [
+interface SeedUser {
+  email: string;
+  name: string;
+  role: 'ADMIN' | 'REGULAR';
+}
+
+interface UserRecord {
+  PK: string;
+  SK: string;
+  GSI1PK: string;
+  GSI1SK: string;
+  EntityType: string;
+  userId: string;
+  email: string;
+  name: string;
+  role: string;
+  token: string;
+  createdAt: string;
+}
+
+interface UserOutput {
+  userId: string;
+  email: string;
+  name: string;
+  role: string;
+  token: string;
+}
+
+const users: SeedUser[] = [
   {
     email: 'admin@catalog.com',
     name: 'Admin User',
@@ -38,11 +76,11 @@ const users = [
   },
 ];
 
-async function seedUsers() {
+async function seedUsers(): Promise<void> {
   console.log('🌱 Seeding users with pre-generated tokens...\n');
 
-  const tokens = {};
-  const usersData = [];
+  const tokens: Record<string, string> = {};
+  const usersData: UserOutput[] = [];
 
   for (const user of users) {
     const userId = uuidv4();
@@ -58,21 +96,23 @@ async function seedUsers() {
       { expiresIn: JWT_EXPIRES_IN }
     );
 
+    const record: UserRecord = {
+      PK: `USER#${userId}`,
+      SK: 'PROFILE',
+      GSI1PK: `ROLE#${user.role}`,
+      GSI1SK: `USER#${userId}`,
+      EntityType: 'User',
+      userId,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      token,
+      createdAt: new Date().toISOString(),
+    };
+
     await docClient.send(new PutCommand({
       TableName: process.env.USERS_TABLE_NAME || 'catalog-users',
-      Item: {
-        PK: `USER#${userId}`,
-        SK: 'PROFILE',
-        GSI1PK: `ROLE#${user.role}`,
-        GSI1SK: `USER#${userId}`,
-        EntityType: 'User',
-        userId,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-        token,
-        createdAt: new Date().toISOString(),
-      },
+      Item: record,
     }));
 
     tokens[user.role] = token;
