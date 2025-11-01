@@ -19,6 +19,7 @@ export class UpdateCatalogItemDto {
   @IsOptional()
   description?: string;
 
+
   @IsString()
   @MinLength(2)
   @MaxLength(50)

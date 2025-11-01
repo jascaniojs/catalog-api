@@ -99,62 +99,6 @@ describe('CatalogItem', () => {
       jest.useRealTimers();
     });
 
-    it('should auto-promote to PENDING_APPROVAL when score >= 70 and status is DRAFT', () => {
-      const item = new CatalogItem({ status: CatalogItemStatus.DRAFT });
-      const score: QualityScore = {
-        total: 75,
-        breakdown: {
-          base: 40,
-          titleLength: 20,
-          descriptionLength: 15,
-          categoryProvided: 0,
-          tagsProvided: 0,
-          uniqueTitle: 0,
-        },
-      };
-
-      item.setQualityScore(score);
-
-      expect(item.status).toBe(CatalogItemStatus.PENDING_APPROVAL);
-    });
-
-    it('should not auto-promote when score < 70', () => {
-      const item = new CatalogItem({ status: CatalogItemStatus.DRAFT });
-      const score: QualityScore = {
-        total: 65,
-        breakdown: {
-          base: 40,
-          titleLength: 0,
-          descriptionLength: 15,
-          categoryProvided: 10,
-          tagsProvided: 0,
-          uniqueTitle: 0,
-        },
-      };
-
-      item.setQualityScore(score);
-
-      expect(item.status).toBe(CatalogItemStatus.DRAFT);
-    });
-
-    it('should not auto-promote when status is not DRAFT', () => {
-      const item = new CatalogItem({ status: CatalogItemStatus.APPROVED });
-      const score: QualityScore = {
-        total: 80,
-        breakdown: {
-          base: 40,
-          titleLength: 20,
-          descriptionLength: 15,
-          categoryProvided: 0,
-          tagsProvided: 0,
-          uniqueTitle: 5,
-        },
-      };
-
-      item.setQualityScore(score);
-
-      expect(item.status).toBe(CatalogItemStatus.APPROVED);
-    });
   });
 
   describe('canBeApproved', () => {
@@ -201,7 +145,7 @@ describe('CatalogItem', () => {
 
   describe('markAsApproved', () => {
     it('should change status to APPROVED and update timestamp', () => {
-      const item = new CatalogItem({ status: CatalogItemStatus.PENDING_APPROVAL });
+      const item = new CatalogItem({ status: CatalogItemStatus.DRAFT });
       const originalUpdatedAt = item.updatedAt;
 
       jest.useFakeTimers();
@@ -218,7 +162,7 @@ describe('CatalogItem', () => {
 
   describe('markAsRejected', () => {
     it('should change status to REJECTED and update timestamp', () => {
-      const item = new CatalogItem({ status: CatalogItemStatus.PENDING_APPROVAL });
+      const item = new CatalogItem({ status: CatalogItemStatus.DRAFT });
       const originalUpdatedAt = item.updatedAt;
 
       jest.useFakeTimers();

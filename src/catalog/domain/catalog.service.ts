@@ -13,8 +13,8 @@ export class CatalogService {
   async createItem(data: {
     title: string;
     description: string;
-    category: string;
-    tags: string[];
+    category?: string;
+    tags?: string[];
   }): Promise<CatalogItem> {
     // Check for duplicate title
     const titleExists = await this.repository.existsByTitle(data.title);

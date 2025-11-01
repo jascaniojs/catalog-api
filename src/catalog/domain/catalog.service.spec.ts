@@ -113,26 +113,6 @@ describe('CatalogService', () => {
         false, // isUniqueTitle = false
       );
     });
-
-    it('should auto-promote to PENDING_APPROVAL when score >= 70', async () => {
-      repository.existsByTitle.mockResolvedValue(false);
-      qualityScoreService.calculateScore.mockReturnValue({ ...mockScore, total: 75 });
-      repository.save.mockImplementation(async (item) => item);
-
-      const result = await service.createItem(createData);
-
-      expect(result.status).toBe(CatalogItemStatus.PENDING_APPROVAL);
-    });
-
-    it('should stay DRAFT when score < 70', async () => {
-      repository.existsByTitle.mockResolvedValue(false);
-      qualityScoreService.calculateScore.mockReturnValue({ ...mockScore, total: 65 });
-      repository.save.mockImplementation(async (item) => item);
-
-      const result = await service.createItem(createData);
-
-      expect(result.status).toBe(CatalogItemStatus.DRAFT);
-    });
   });
 
   describe('getItemById', () => {
@@ -303,7 +283,7 @@ describe('CatalogService', () => {
     it('should approve item when quality score >= 70', async () => {
       const mockItem = new CatalogItem({
         id: 'test-id',
-        status: CatalogItemStatus.PENDING_APPROVAL,
+        status: CatalogItemStatus.DRAFT,
       });
       mockItem.qualityScore = {
         total: 75,
@@ -330,7 +310,7 @@ describe('CatalogService', () => {
     it('should not approve item when quality score < 70', async () => {
       const mockItem = new CatalogItem({
         id: 'test-id',
-        status: CatalogItemStatus.PENDING_APPROVAL,
+        status: CatalogItemStatus.DRAFT,
       });
       mockItem.qualityScore = {
         total: 65,
@@ -348,7 +328,7 @@ describe('CatalogService', () => {
 
       const result = await service.approveItem('test-id');
 
-      expect(result.status).toBe(CatalogItemStatus.PENDING_APPROVAL);
+      expect(result.status).toBe(CatalogItemStatus.DRAFT);
       expect(repository.update).not.toHaveBeenCalled();
     });
 
@@ -365,7 +345,7 @@ describe('CatalogService', () => {
     it('should reject item', async () => {
       const mockItem = new CatalogItem({
         id: 'test-id',
-        status: CatalogItemStatus.PENDING_APPROVAL,
+        status: CatalogItemStatus.DRAFT,
       });
 
       repository.findById.mockResolvedValue(mockItem);

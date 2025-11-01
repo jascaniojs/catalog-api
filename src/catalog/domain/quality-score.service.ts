@@ -15,7 +15,7 @@ export class QualityScoreService {
       titleLength: this.scoreTitleLength(title),
       descriptionLength: this.scoreDescriptionLength(description),
       categoryProvided: category ? 10 : 0,
-      tagsProvided: this.scoreTagsProvided(tags),
+      tagsProvided: tags ? this.scoreTags(tags) : 0,
       uniqueTitle: isUniqueTitle ? 5 : 0,
     };
 
@@ -39,7 +39,7 @@ export class QualityScoreService {
     return description.length >= 60 ? 15 : 0;
   }
 
-  private scoreTagsProvided(tags: string[]): number {
+  private scoreTags(tags: string[]): number {
     if (tags.length >= 1 && tags.length <= 3) {
       return 10; // 1-3 tags
     } else if (tags.length > 3) {

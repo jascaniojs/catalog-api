@@ -20,7 +20,8 @@ export class CreateCatalogItemDto {
   @IsString()
   @MinLength(2)
   @MaxLength(50)
-  category: string;
+  @IsOptional()
+  category?: string;
 
   @IsArray()
   @IsString({ each: true })

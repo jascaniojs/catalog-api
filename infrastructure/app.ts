@@ -10,7 +10,7 @@ const app = new cdk.App();
 
 new CatalogApiStack(app, 'CatalogApiStack', {
   env: {
-    region: config.AWS_REGION || 'us-east-1',
+    region: config.AWS_REGION || 'eu-central-1',
   },
     config
 });

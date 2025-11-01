@@ -2,7 +2,6 @@ import { v4 as uuidv4 } from 'uuid';
 
 export enum CatalogItemStatus {
   DRAFT = 'DRAFT',
-  PENDING_APPROVAL = 'PENDING_APPROVAL',
   APPROVED = 'APPROVED',
   REJECTED = 'REJECTED',
 }
@@ -58,11 +57,6 @@ export class CatalogItem {
   setQualityScore(score: QualityScore): void {
     this.qualityScore = score;
     this.updatedAt = new Date();
-
-    // Auto-promote to pending approval if score is high enough
-    if (this.status === CatalogItemStatus.DRAFT && score.total >= 70) {
-      this.status = CatalogItemStatus.PENDING_APPROVAL;
-    }
   }
 
   canBeApproved(): boolean {
