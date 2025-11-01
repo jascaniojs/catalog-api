@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
-import { CatalogApiStack } from './stacks/catalog-api-stack';
+import { CatalogApiStackV2 as CatalogApiStack } from './stacks/catalog-api-stack-v2';
 import {getConfig} from "./lib/config";
 
 const config = getConfig();

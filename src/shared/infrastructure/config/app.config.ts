@@ -33,7 +33,7 @@ export const appConfig = (): AppConfig => ({
   nodeEnv: process.env.NODE_ENV || 'development',
   port: parseInt(process.env.PORT, 10) || 3000,
   aws: {
-    region: process.env.AWS_REGION || 'us-east-1',
+    region: process.env.AWS_REGION || 'eu-central-1',
     dynamodb: {
       endpoint: process.env.DYNAMODB_ENDPOINT,
       tableName: process.env.DYNAMODB_TABLE_NAME || 'catalog-items',
@@ -65,10 +65,10 @@ export const appConfigAsync = async (): Promise<AppConfig> => {
   const secrets = await SecretsLoader.loadSecrets();
 
   return {
-    nodeEnv: process.env.NODE_ENV || 'development',
+    nodeEnv: process.env.NODE_ENV,
     port: parseInt(process.env.PORT, 10) || 3000,
     aws: {
-      region: process.env.AWS_REGION || 'us-east-1',
+      region: process.env.AWS_REGION || 'eu-central-1',
       dynamodb: {
         endpoint: process.env.DYNAMODB_ENDPOINT,
         tableName: process.env.DYNAMODB_TABLE_NAME || 'catalog-items',
